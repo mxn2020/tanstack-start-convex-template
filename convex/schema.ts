@@ -1,3 +1,5 @@
+// convex/schema.ts
+
 import { defineSchema, defineTable } from 'convex/server'
 import { type Infer, v } from 'convex/values'
 
