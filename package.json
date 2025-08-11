@@ -8,7 +8,10 @@
     "dev:web": "vite dev",
     "dev:db": "convex dev --run board:seed",
     "build": "vite build && tsc --noEmit",
-    "start": "vite start"
+    "start": "vite start",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@convex-dev/react-query": "0.0.0-alpha.8",
@@ -22,8 +25,8 @@
     "convex": "^1.19.0",
     "ky": "^1.8.2",
     "msw": "^2.10.4",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-hot-toast": "^2.5.2",
     "redaxios": "^0.5.1",
     "tailwind-merge": "^3.3.1",
@@ -33,13 +36,20 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/vite": "^4.1.11",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitest/coverage-v8": "^2.2.3",
+    "@vitest/ui": "^2.2.3",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.11",
+    "jsdom": "^26.0.1",
     "typescript": "^5.9.2",
     "vite": "^7.1.1",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.2.3"
   }
 }
