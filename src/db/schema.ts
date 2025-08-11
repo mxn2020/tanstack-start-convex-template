@@ -1,3 +1,5 @@
+// src/db/schema.ts
+
 import { z } from 'zod'
 
 // Zod is necessary for client side parsing.

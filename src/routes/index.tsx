@@ -1,3 +1,5 @@
+// src/routes/index.tsx
+
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { convexQuery } from '@convex-dev/react-query'

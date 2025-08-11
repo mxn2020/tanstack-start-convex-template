@@ -1,3 +1,5 @@
+// src/components/Board.tsx
+
 import { useCallback, useMemo, useRef } from 'react'
 import invariant from 'tiny-invariant'
 import { useSuspenseQuery } from '@tanstack/react-query'
