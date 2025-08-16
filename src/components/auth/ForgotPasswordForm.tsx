@@ -1,18 +1,17 @@
 import { useState } from 'react'
+import { Mail, ArrowRight, ArrowLeft, Send } from 'lucide-react'
 import { authClient } from '~/lib/auth-client'
-import { SaveButton } from '../SaveButton'
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState('')
+  const [isEmailSent, setIsEmailSent] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
-    setMessage('')
 
     try {
       const result = await authClient.forgetPassword({
@@ -23,7 +22,7 @@ export function ForgotPasswordForm() {
       if (result.error) {
         setError(result.error.message || 'An error occurred')
       } else {
-        setMessage('Password reset email sent! Check your inbox.')
+        setIsEmailSent(true)
       }
     } catch (err) {
       setError('An unexpected error occurred')
@@ -32,62 +31,109 @@ export function ForgotPasswordForm() {
     }
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Reset your password
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          {message && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-              {message}
-            </div>
-          )}
+  if (isEmailSent) {
+    return (
+      <div className="text-center space-y-6">
+        <div className="text-8xl mb-6">📧</div>
+        <h3 className="text-2xl font-black text-purple-700 mb-4">
+          Check your inbox, bestie! 💌
+        </h3>
+        <p className="text-purple-600 font-medium mb-6 leading-relaxed">
+          We've sent a password reset link to <strong>{email}</strong>. 
+          Click the link in the email to reset your password and get back to crushing those yallas! 🔥
+        </p>
+        
+        <div className="space-y-4">
+          <button
+            onClick={() => {
+              setIsEmailSent(false)
+              setEmail('')
+              setError('')
+            }}
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white py-4 rounded-2xl font-black text-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+          >
+            <Send className="h-5 w-5" />
+            <span>Resend Email</span>
+          </button>
           
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
+          <a
+            href="/auth/login"
+            className="w-full text-purple-600 hover:text-purple-800 py-3 font-bold transition-colors flex items-center justify-center space-x-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Login</span>
+          </a>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <div className="text-6xl mb-4">🤔</div>
+        <h3 className="text-xl font-black text-purple-700 mb-2">
+          Forgot your password?
+        </h3>
+        <p className="text-purple-600 font-medium">
+          No worries! We'll send you a reset link to get you back in the game! 🎮
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-2xl font-medium">
+            {error}
+          </div>
+        )}
+
+        {/* Email Field */}
+        <div>
+          <label className="block text-sm font-bold text-purple-700 mb-2">
+            Email Address ✨
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 h-5 w-5" />
             <input
-              id="email"
-              name="email"
               type="email"
-              autoComplete="email"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
+              className="w-full pl-12 pr-4 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 transition-all text-purple-800 font-medium placeholder-purple-400"
+              placeholder="your.email@yalla.wtf"
+              required
             />
           </div>
+        </div>
 
-          <div className="flex gap-2">
-            <SaveButton type="submit" disabled={isLoading}>
-              {isLoading ? 'Sending...' : 'Send reset email'}
-            </SaveButton>
-          </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 rounded-2xl font-black text-lg transition-all transform hover:scale-105 disabled:scale-100 shadow-lg flex items-center justify-center space-x-2"
+        >
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              <span>Sending magic link... ✨</span>
+            </>
+          ) : (
+            <>
+              <span>Send Reset Link 🚀</span>
+              <ArrowRight className="h-5 w-5" />
+            </>
+          )}
+        </button>
+      </form>
 
-          <div className="text-center">
-            <span className="text-sm text-gray-600">
-              Remember your password?{' '}
-              <a href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Sign in
-              </a>
-            </span>
-          </div>
-        </form>
+      {/* Back to Login */}
+      <div className="text-center pt-4 border-t border-purple-200">
+        <a
+          href="/auth/login"
+          className="text-purple-600 hover:text-purple-800 font-bold transition-colors flex items-center justify-center space-x-2 mx-auto"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Login</span>
+        </a>
       </div>
     </div>
   )
