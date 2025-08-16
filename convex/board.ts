@@ -24,10 +24,13 @@ export const seed = internalMutation(async (ctx) => {
   }
   
   // Create a demo user first for the seed board
-  const demoUserId = await ctx.db.insert('users', {
+  await ctx.db.insert('users', {
     authUserId: 'demo-user-1',
     email: 'demo@example.com',
     name: 'Demo User',
+    karmaLevel: 85,
+    tasksCompleted: 23,
+    tasksAssigned: 18,
     preferences: {
       theme: 'light',
       notifications: true,
@@ -64,6 +67,9 @@ export const clear = internalMutation(async (ctx) => {
       authUserId: 'demo-user-1',
       email: 'demo@example.com',
       name: 'Demo User',
+      karmaLevel: 85,
+      tasksCompleted: 23,
+      tasksAssigned: 18,
       preferences: {
         theme: 'light',
         notifications: true,

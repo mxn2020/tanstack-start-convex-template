@@ -9,6 +9,9 @@ const schema = defineSchema({
     email: v.string(),
     name: v.optional(v.string()),
     avatar: v.optional(v.string()),
+    karmaLevel: v.number(),
+    tasksCompleted: v.number(),
+    tasksAssigned: v.number(),
     preferences: v.optional(v.object({
       theme: v.optional(v.string()), // "light", "dark", "auto"
       notifications: v.optional(v.boolean()),

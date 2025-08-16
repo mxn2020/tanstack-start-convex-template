@@ -1,3 +1,13 @@
+export interface ConvexUser {
+  authUserId: string;
+  email: string;
+  name?: string;
+  avatar?: string;
+  karmaLevel: number;
+  tasksCompleted: number;
+  tasksAssigned: number;
+}
+
 export interface RenderedItem {
   id: string
   title: string

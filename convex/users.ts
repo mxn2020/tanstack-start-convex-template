@@ -30,12 +30,15 @@ export const createOrUpdateUser = mutation({
       })
       return existingUser._id
     } else {
-      // Create new user
+      // Create new user with default karma and task values
       const userId = await ctx.db.insert('users', {
         authUserId: args.authUserId,
         email: args.email,
         name: args.name,
         avatar: args.avatar,
+        karmaLevel: 0,
+        tasksCompleted: 0,
+        tasksAssigned: 0,
         preferences: {
           theme: 'light',
           notifications: true,
@@ -127,6 +130,85 @@ export const deleteUser = mutation({
     if (user) {
       await ctx.db.delete(user._id)
     }
+  },
+})
+
+// Update user karma level
+export const updateKarmaLevel = mutation({
+  args: {
+    authUserId: v.string(),
+    karmaLevel: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('authUserId', (q) => q.eq('authUserId', args.authUserId))
+      .first()
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    await ctx.db.patch(user._id, {
+      karmaLevel: args.karmaLevel,
+      updatedAt: Date.now(),
+    })
+  },
+})
+
+// Update task completion count
+export const updateTasksCompleted = mutation({
+  args: {
+    authUserId: v.string(),
+    increment: v.optional(v.boolean()), // true to increment, false to set absolute value
+    count: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('authUserId', (q) => q.eq('authUserId', args.authUserId))
+      .first()
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    const newCount = args.increment 
+      ? user.tasksCompleted + 1
+      : args.count ?? user.tasksCompleted
+
+    await ctx.db.patch(user._id, {
+      tasksCompleted: newCount,
+      updatedAt: Date.now(),
+    })
+  },
+})
+
+// Update task assignment count
+export const updateTasksAssigned = mutation({
+  args: {
+    authUserId: v.string(),
+    increment: v.optional(v.boolean()), // true to increment, false to set absolute value
+    count: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('authUserId', (q) => q.eq('authUserId', args.authUserId))
+      .first()
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    const newCount = args.increment 
+      ? user.tasksAssigned + 1
+      : args.count ?? user.tasksAssigned
+
+    await ctx.db.patch(user._id, {
+      tasksAssigned: newCount,
+      updatedAt: Date.now(),
+    })
   },
 })
 
