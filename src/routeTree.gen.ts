@@ -11,6 +11,7 @@
 import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as BoardsRouteImport } from './routes/boards'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BoardsBoardIdRouteImport } from './routes/boards.$boardId'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
@@ -21,15 +22,20 @@ import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/
 
 const rootServerRouteImport = createServerRootRoute()
 
+const BoardsRoute = BoardsRouteImport.update({
+  id: '/boards',
+  path: '/boards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BoardsBoardIdRoute = BoardsBoardIdRouteImport.update({
-  id: '/boards/$boardId',
-  path: '/boards/$boardId',
-  getParentRoute: () => rootRouteImport,
+  id: '/$boardId',
+  path: '/$boardId',
+  getParentRoute: () => BoardsRoute,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
   id: '/auth/signup',
@@ -59,6 +65,7 @@ const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/boards': typeof BoardsRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/boards': typeof BoardsRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -76,6 +84,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/boards': typeof BoardsRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/boards'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/boards'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -102,6 +113,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/boards'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -111,11 +123,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BoardsRoute: typeof BoardsRouteWithChildren
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
-  BoardsBoardIdRoute: typeof BoardsBoardIdRoute
 }
 export interface FileServerRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
@@ -141,6 +153,13 @@ export interface RootServerRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/boards': {
+      id: '/boards'
+      path: '/boards'
+      fullPath: '/boards'
+      preLoaderRoute: typeof BoardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -150,10 +169,10 @@ declare module '@tanstack/react-router' {
     }
     '/boards/$boardId': {
       id: '/boards/$boardId'
-      path: '/boards/$boardId'
+      path: '/$boardId'
       fullPath: '/boards/$boardId'
       preLoaderRoute: typeof BoardsBoardIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof BoardsRoute
     }
     '/auth/signup': {
       id: '/auth/signup'
@@ -197,13 +216,24 @@ declare module '@tanstack/react-start/server' {
   }
 }
 
+interface BoardsRouteChildren {
+  BoardsBoardIdRoute: typeof BoardsBoardIdRoute
+}
+
+const BoardsRouteChildren: BoardsRouteChildren = {
+  BoardsBoardIdRoute: BoardsBoardIdRoute,
+}
+
+const BoardsRouteWithChildren =
+  BoardsRoute._addFileChildren(BoardsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BoardsRoute: BoardsRouteWithChildren,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
-  BoardsBoardIdRoute: BoardsBoardIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

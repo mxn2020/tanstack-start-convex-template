@@ -1,32 +1,26 @@
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { reactStartCookies } from "better-auth/react-start";
-import { PrismaClient } from "@prisma/client";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../../convex/_generated/api";
 
-// Create fresh Prisma client to avoid cached plan issues
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
+// Convex client for syncing users
+const convex = new ConvexHttpClient(process.env.VITE_CONVEX_URL || "http://localhost:3210");
 
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql", // Neon uses PostgreSQL
-  }),
-  emailAndPassword: {
-    enabled: true,
-  },
-  socialProviders: {
-    // GitHub OAuth can be added later
-    // github: {
-    //   clientId: process.env.GITHUB_CLIENT_ID as string,
-    //   clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    // },
-  },
-  plugins: [
-    reactStartCookies(), // make sure this is the last plugin in the array
-  ],
-});
+// Utility function to sync user to Convex
+export async function syncUserToConvex(user: {
+  id: string;
+  email: string;
+  name?: string | null;
+  image?: string | null;
+}) {
+  try {
+    await convex.mutation(api.users.createOrUpdateUser, {
+      authUserId: user.id,
+      email: user.email,
+      name: user.name || undefined,
+      avatar: user.image || undefined,
+    });
+    console.log(`✅ User synced to Convex: ${user.email}`);
+  } catch (error) {
+    console.error(`❌ Failed to sync user to Convex:`, error);
+    throw error;
+  }
+}

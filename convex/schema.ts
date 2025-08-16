@@ -4,11 +4,30 @@ import { defineSchema, defineTable } from 'convex/server'
 import { type Infer, v } from 'convex/values'
 
 const schema = defineSchema({
+  users: defineTable({
+    authUserId: v.string(), // Reference to Better Auth user ID
+    email: v.string(),
+    name: v.optional(v.string()),
+    avatar: v.optional(v.string()),
+    preferences: v.optional(v.object({
+      theme: v.optional(v.string()), // "light", "dark", "auto"
+      notifications: v.optional(v.boolean()),
+      language: v.optional(v.string()),
+    })),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('authUserId', ['authUserId'])
+    .index('email', ['email']),
+
   boards: defineTable({
     id: v.string(),
     name: v.string(),
     color: v.string(),
-  }).index('id', ['id']),
+    createdBy: v.optional(v.string()), // authUserId of creator
+    createdAt: v.optional(v.number()),
+  }).index('id', ['id'])
+    .index('createdBy', ['createdBy']),
 
   columns: defineTable({
     id: v.string(),
@@ -33,6 +52,7 @@ const schema = defineSchema({
 })
 export default schema
 
+const user = schema.tables.users.validator
 const board = schema.tables.boards.validator
 const column = schema.tables.columns.validator
 const item = schema.tables.items.validator
@@ -61,6 +81,7 @@ export const deleteColumnSchema = v.object({
   id: column.fields.id,
 })
 
+export type User = Infer<typeof user>
 export type Board = Infer<typeof board>
 export type Column = Infer<typeof column>
 export type Item = Infer<typeof item>

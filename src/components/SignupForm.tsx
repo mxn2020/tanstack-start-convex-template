@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { signUpEmail } from '~/lib/auth-client'
+import { syncUserToConvex } from '~/lib/auth'
 import { SaveButton } from './SaveButton'
 
 export function SignupForm() {
@@ -39,10 +40,25 @@ export function SignupForm() {
 
       if (result.error) {
         setError(result.error.message || 'An error occurred')
-      } else {
-        // Redirect to the intended page or home
-        const redirectTo = (search as any)?.redirect || '/'
-        navigate({ to: redirectTo })
+      } else if (result.data) {
+        try {
+          // Sync user to Convex
+          await syncUserToConvex({
+            id: result.data.user.id,
+            email: result.data.user.email,
+            name: result.data.user.name,
+            image: result.data.user.image,
+          })
+          
+          // Redirect to the intended page or home
+          const redirectTo = (search as any)?.redirect || '/'
+          navigate({ to: redirectTo })
+        } catch (syncError) {
+          console.error('User sync failed:', syncError)
+          // Still redirect even if sync fails - auth worked
+          const redirectTo = (search as any)?.redirect || '/'
+          navigate({ to: redirectTo })
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred')

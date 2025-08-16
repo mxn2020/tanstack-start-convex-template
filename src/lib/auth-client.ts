@@ -17,3 +17,7 @@ export const {
 // Email/password specific functions
 export const signInEmail = authClient.signIn.email;
 export const signUpEmail = authClient.signUp.email;
+
+// Social auth functions
+export const signInSocial = authClient.signIn.social;
+

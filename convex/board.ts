@@ -22,10 +22,27 @@ export const seed = internalMutation(async (ctx) => {
   if (allBoards.length > 0) {
     return
   }
+  
+  // Create a demo user first for the seed board
+  const demoUserId = await ctx.db.insert('users', {
+    authUserId: 'demo-user-1',
+    email: 'demo@example.com',
+    name: 'Demo User',
+    preferences: {
+      theme: 'light',
+      notifications: true,
+      language: 'en',
+    },
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  })
+  
   await ctx.db.insert('boards', {
     id: '1',
     name: 'First board',
     color: '#e0e0e0',
+    createdBy: 'demo-user-1',
+    createdAt: Date.now(),
   })
 })
 
@@ -35,10 +52,34 @@ export const clear = internalMutation(async (ctx) => {
   for (const board of allBoards) {
     await ctx.db.delete(board._id)
   }
+  
+  // Ensure demo user exists for the cleared board
+  const existingDemoUser = await ctx.db
+    .query('users')
+    .withIndex('authUserId', (q) => q.eq('authUserId', 'demo-user-1'))
+    .first()
+    
+  if (!existingDemoUser) {
+    await ctx.db.insert('users', {
+      authUserId: 'demo-user-1',
+      email: 'demo@example.com',
+      name: 'Demo User',
+      preferences: {
+        theme: 'light',
+        notifications: true,
+        language: 'en',
+      },
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    })
+  }
+  
   await ctx.db.insert('boards', {
     id: '1',
     name: 'First board',
     color: '#e0e0e0',
+    createdBy: 'demo-user-1',
+    createdAt: Date.now(),
   })
 })
 
@@ -70,9 +111,40 @@ async function getFullBoard(ctx: QueryCtx, id: string) {
   }
 }
 
-export const getBoards = query(async (ctx) => {
+export const getBoards = query({
+  args: { authUserId: v.optional(v.string()) },
+  handler: async (ctx, { authUserId }) => {
+    let boards
+    if (authUserId) {
+      // Get boards created by specific user
+      boards = await ctx.db
+        .query('boards')
+        .withIndex('createdBy', (q) => q.eq('createdBy', authUserId))
+        .collect()
+    } else {
+      // Get all boards (for backwards compatibility)
+      boards = await ctx.db.query('boards').collect()
+    }
+    return await Promise.all(boards.map((b) => getFullBoard(ctx, b.id)))
+  },
+})
+
+// Get all boards (public endpoint)
+export const getAllBoards = query(async (ctx) => {
   const boards = await ctx.db.query('boards').collect()
   return await Promise.all(boards.map((b) => getFullBoard(ctx, b.id)))
+})
+
+// Get boards for a specific user
+export const getUserBoards = query({
+  args: { authUserId: v.string() },
+  handler: async (ctx, { authUserId }) => {
+    const boards = await ctx.db
+      .query('boards')
+      .withIndex('createdBy', (q) => q.eq('createdBy', authUserId))
+      .collect()
+    return await Promise.all(boards.map((b) => getFullBoard(ctx, b.id)))
+  },
 })
 
 export const getBoard = query({
@@ -119,10 +191,51 @@ async function ensureItemExists(
   return item
 }
 
+// Check if user has access to board (owner or collaborator)
+async function ensureUserCanAccessBoard(
+  ctx: QueryCtx,
+  boardId: string,
+  authUserId?: string,
+): Promise<Doc<'boards'>> {
+  const board = await ensureBoardExists(ctx, boardId)
+  
+  // For now, only check ownership. Later can add collaboration logic
+  if (authUserId && board.createdBy && board.createdBy !== authUserId) {
+    throw new Error(`Access denied: User ${authUserId} cannot access board ${boardId}`)
+  }
+  
+  return board
+}
+
+// Create a new board
+export const createBoard = mutation({
+  args: {
+    name: v.string(),
+    color: v.optional(v.string()),
+    authUserId: v.string(),
+  },
+  handler: async (ctx, { name, color, authUserId }) => {
+    const boardId = crypto.randomUUID()
+    
+    await ctx.db.insert('boards', {
+      id: boardId,
+      name,
+      color: color || '#e0e0e0',
+      createdBy: authUserId,
+      createdAt: Date.now(),
+    })
+    
+    return boardId
+  },
+})
+
 export const createColumn = mutation({
-  args: newColumnsSchema,
-  handler: async (ctx, { boardId, name }) => {
-    ensureBoardExists(ctx, boardId)
+  args: {
+    ...newColumnsSchema.fields,
+    authUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, { boardId, name, authUserId }) => {
+    await ensureUserCanAccessBoard(ctx, boardId, authUserId)
 
     const existingColumns = await ctx.db
       .query('columns')
@@ -139,54 +252,72 @@ export const createColumn = mutation({
 })
 
 export const createItem = mutation({
-  args: schema.tables.items.validator,
-  handler: async (ctx, item) => {
-    await ensureBoardExists(ctx, item.boardId)
+  args: {
+    ...schema.tables.items.validator.fields,
+    authUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, { authUserId, ...item }) => {
+    await ensureUserCanAccessBoard(ctx, item.boardId, authUserId)
     await ctx.db.insert('items', item)
   },
 })
 
 export const deleteItem = mutation({
-  args: deleteItemSchema,
-  handler: async (ctx, { id, boardId }) => {
-    await ensureBoardExists(ctx, boardId)
+  args: {
+    ...deleteItemSchema.fields,
+    authUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, { id, boardId, authUserId }) => {
+    await ensureUserCanAccessBoard(ctx, boardId, authUserId)
     const item = await ensureItemExists(ctx, id)
     await ctx.db.delete(item._id)
   },
 })
 
 export const updateItem = mutation({
-  args: schema.tables.items.validator,
-  handler: async (ctx, newItem) => {
+  args: {
+    ...schema.tables.items.validator.fields,
+    authUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, { authUserId, ...newItem }) => {
     const { id, boardId } = newItem
-    await ensureBoardExists(ctx, boardId)
+    await ensureUserCanAccessBoard(ctx, boardId, authUserId)
     const item = await ensureItemExists(ctx, id)
     await ctx.db.patch(item._id, newItem)
   },
 })
 
 export const updateColumn = mutation({
-  args: updateColumnSchema,
-  handler: async (ctx, newColumn) => {
+  args: {
+    ...updateColumnSchema.fields,
+    authUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, { authUserId, ...newColumn }) => {
     const { id, boardId } = newColumn
-    await ensureBoardExists(ctx, boardId)
-    const item = await ensureColumnExists(ctx, id)
-    await ctx.db.patch(item._id, newColumn)
+    await ensureUserCanAccessBoard(ctx, boardId, authUserId)
+    const column = await ensureColumnExists(ctx, id)
+    await ctx.db.patch(column._id, newColumn)
   },
 })
 
 export const updateBoard = mutation({
-  args: updateBoardSchema,
-  handler: async (ctx, boardUpdate) => {
-    const board = await ensureBoardExists(ctx, boardUpdate.id)
+  args: {
+    ...updateBoardSchema.fields,
+    authUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, { authUserId, ...boardUpdate }) => {
+    const board = await ensureUserCanAccessBoard(ctx, boardUpdate.id, authUserId)
     await ctx.db.patch(board._id, boardUpdate)
   },
 })
 
 export const deleteColumn = mutation({
-  args: deleteColumnSchema,
-  handler: async (ctx, { boardId, id }) => {
-    await ensureBoardExists(ctx, boardId)
+  args: {
+    ...deleteColumnSchema.fields,
+    authUserId: v.optional(v.string()),
+  },
+  handler: async (ctx, { boardId, id, authUserId }) => {
+    await ensureUserCanAccessBoard(ctx, boardId, authUserId)
     const column = await ensureColumnExists(ctx, id)
     const items = await ctx.db
       .query('items')

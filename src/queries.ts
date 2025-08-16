@@ -130,3 +130,26 @@ export function useUpdateColumnMutation() {
 
   return useMutation({ mutationFn })
 }
+
+export function useCreateBoardMutation() {
+  const mutationFn = useConvexMutation(
+    api.board.createBoard,
+  ).withOptimisticUpdate((localStore, args) => {
+    const boards = localStore.getQuery(api.board.getBoards, {})
+    if (!boards) return
+
+    const newBoard = {
+      id: Math.random() + '', // Temporary ID for optimistic update
+      name: args.name,
+      color: args.color || '#e0e0e0',
+      columns: [],
+      items: [],
+      createdBy: args.authUserId,
+      createdAt: Date.now(),
+    }
+
+    localStore.setQuery(api.board.getBoards, {}, [...boards, newBoard])
+  })
+
+  return useMutation({ mutationFn })
+}

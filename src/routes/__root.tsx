@@ -105,11 +105,21 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             <div className="bg-slate-900 border-b border-slate-800 flex items-center justify-between py-4 px-8 box-border">
               <div className="flex items-center gap-4">
                 <div>
-                  <Link to="/" className="block leading-tight">
+                  <Link to="/boards" className="block leading-tight">
                     <div className="font-black text-2xl text-white">Trellaux</div>
                     <div className="text-slate-500">a TanStack Demo</div>
                   </Link>
                 </div>
+                <nav className="flex items-center gap-4 ml-8">
+                  <Link
+                    to="/boards"
+                    className="text-white hover:text-slate-300 font-medium transition-colors"
+                    activeOptions={{ exact: false }}
+                    activeProps={{ className: "text-blue-400" }}
+                  >
+                    Boards
+                  </Link>
+                </nav>
                 <LoadingIndicator />
               </div>
               <div className="flex items-center gap-6">
