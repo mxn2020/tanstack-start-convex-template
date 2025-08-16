@@ -68,3 +68,4 @@ temp/
 
 # Sentry
 .env.sentry-build-plugin
+/generated/prisma

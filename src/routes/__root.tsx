@@ -7,6 +7,7 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  useLocation,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import * as React from 'react'
@@ -15,9 +16,11 @@ import type { QueryClient } from '@tanstack/react-query'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
 import { IconLink } from '~/components/IconLink'
 import { NotFound } from '~/components/NotFound'
+import { AuthGuard } from '~/components/AuthGuard'
 import appCss from '~/styles/app.css?url'
 import { seo } from '~/utils/seo'
 import { Loader } from '~/components/Loader'
+import { useSession, signOut } from '~/lib/auth-client'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -74,12 +77,23 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      <AuthGuard>
+        <Outlet />
+      </AuthGuard>
     </RootDocument>
   )
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  const session = useSession()
+  const isAuthRoute = location.pathname.startsWith('/auth/')
+
+  const handleLogout = async () => {
+    await signOut()
+    // Redirect will be handled by AuthGuard
+  }
+
   return (
     <html>
       <head>
@@ -87,47 +101,44 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <div className="h-screen flex flex-col min-h-0">
-          <div className="bg-slate-900 border-b border-slate-800 flex items-center justify-between py-4 px-8 box-border">
-            <div className="flex items-center gap-4">
-              <div>
-                <Link to="/" className="block leading-tight">
-                  <div className="font-black text-2xl text-white">Trellaux</div>
-                  <div className="text-slate-500">a TanStack Demo</div>
-                </Link>
+          {!isAuthRoute && (
+            <div className="bg-slate-900 border-b border-slate-800 flex items-center justify-between py-4 px-8 box-border">
+              <div className="flex items-center gap-4">
+                <div>
+                  <Link to="/" className="block leading-tight">
+                    <div className="font-black text-2xl text-white">Trellaux</div>
+                    <div className="text-slate-500">a TanStack Demo</div>
+                  </Link>
+                </div>
+                <LoadingIndicator />
               </div>
-              <LoadingIndicator />
+              <div className="flex items-center gap-6">
+                {session.data && (
+                  <div className="flex items-center gap-4">
+                    <span className="text-white text-sm">
+                      {session.data.user.name || session.data.user.email}
+                    </span>
+                    <button
+                      onClick={handleLogout}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+                <IconLink
+                  href="https://github.com/TanStack/router/tree/main/examples/react/start-trellaux"
+                  label="Source"
+                  icon="/github-mark-white.png"
+                />
+                <IconLink
+                  href="https://tanstack.com"
+                  icon="/tanstack.png"
+                  label="TanStack"
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-6">
-              {/* <label
-                htmlFor="countries"
-                className="block text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Delay
-              </label>
-              <select
-                className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                onChange={(event) => {
-                  // setExtraDelay(Number(event.currentTarget.value))
-                }}
-                defaultValue="0"
-              >
-                <option value="0">None</option>
-                <option value="100">100</option>
-                <option value="500">500</option>
-                <option value="2000">2000</option>
-              </select> */}
-              <IconLink
-                href="https://github.com/TanStack/router/tree/main/examples/react/start-trellaux"
-                label="Source"
-                icon="/github-mark-white.png"
-              />
-              <IconLink
-                href="https://tanstack.com"
-                icon="/tanstack.png"
-                label="TanStack"
-              />
-            </div>
-          </div>
+          )}
 
           <div className="flex-grow min-h-0 h-full flex flex-col">
             {children}
