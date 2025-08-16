@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { LoginForm } from '~/components/LoginForm'
+import { LoginForm } from '~/components/auth/LoginForm'
+import { AuthLayout } from '~/components/auth/AuthLayout'
 
 export const Route = createFileRoute('/auth/login')({
   validateSearch: (search: Record<string, unknown>) => {
@@ -11,5 +12,12 @@ export const Route = createFileRoute('/auth/login')({
 })
 
 function LoginPage() {
-  return <LoginForm />
+  return (
+    <AuthLayout 
+      title="Welcome Back!" 
+      subtitle="Sign in to continue your journey 🌟"
+    >
+      <LoginForm />
+    </AuthLayout>
+  )
 }

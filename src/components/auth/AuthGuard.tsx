@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useLocation } from '@tanstack/react-router'
 import { useSession } from '~/lib/auth-client'
-import { Loader } from './Loader'
+import { Loader } from '../Loader'
 
 interface AuthGuardProps {
   children: React.ReactNode

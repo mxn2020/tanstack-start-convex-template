@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { signUpEmail } from '~/lib/auth-client'
 import { syncUserToConvex } from '~/lib/auth'
-import { SaveButton } from './SaveButton'
+import { SaveButton } from '../SaveButton'
 
 export function SignupForm() {
   const navigate = useNavigate()

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { authClient } from '~/lib/auth-client'
-import { SaveButton } from './SaveButton'
+import { SaveButton } from '../SaveButton'
 
 export function ResetPasswordForm() {
   const navigate = useNavigate()

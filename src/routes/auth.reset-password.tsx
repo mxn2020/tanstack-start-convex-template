@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ResetPasswordForm } from '~/components/ResetPasswordForm'
+import { ResetPasswordForm } from '~/components/auth/ResetPasswordForm'
+import { AuthLayout } from '~/components/auth/AuthLayout'
 
 export const Route = createFileRoute('/auth/reset-password')({
   validateSearch: (search: Record<string, unknown>) => {
@@ -11,5 +12,12 @@ export const Route = createFileRoute('/auth/reset-password')({
 })
 
 function ResetPasswordPage() {
-  return <ResetPasswordForm />
+  return (
+    <AuthLayout 
+      title="New Password" 
+      subtitle="Almost there! Set your new password 🔐"
+    >
+      <ResetPasswordForm />
+    </AuthLayout>
+  )
 }

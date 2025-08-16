@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { authClient } from '~/lib/auth-client'
-import { SaveButton } from './SaveButton'
+import { SaveButton } from '../SaveButton'
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState('')
