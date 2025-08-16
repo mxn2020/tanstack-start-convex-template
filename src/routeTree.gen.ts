@@ -11,6 +11,9 @@
 import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as YallasRouteImport } from './routes/yallas'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CirclesRouteImport } from './routes/circles'
 import { Route as BoardsRouteImport } from './routes/boards'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BoardsBoardIdRouteImport } from './routes/boards.$boardId'
@@ -22,6 +25,21 @@ import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/
 
 const rootServerRouteImport = createServerRootRoute()
 
+const YallasRoute = YallasRouteImport.update({
+  id: '/yallas',
+  path: '/yallas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CirclesRoute = CirclesRouteImport.update({
+  id: '/circles',
+  path: '/circles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BoardsRoute = BoardsRouteImport.update({
   id: '/boards',
   path: '/boards',
@@ -66,6 +84,9 @@ const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/boards': typeof BoardsRouteWithChildren
+  '/circles': typeof CirclesRoute
+  '/dashboard': typeof DashboardRoute
+  '/yallas': typeof YallasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -75,6 +96,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/boards': typeof BoardsRouteWithChildren
+  '/circles': typeof CirclesRoute
+  '/dashboard': typeof DashboardRoute
+  '/yallas': typeof YallasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -85,6 +109,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/boards': typeof BoardsRouteWithChildren
+  '/circles': typeof CirclesRoute
+  '/dashboard': typeof DashboardRoute
+  '/yallas': typeof YallasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -96,6 +123,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/boards'
+    | '/circles'
+    | '/dashboard'
+    | '/yallas'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -105,6 +135,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/boards'
+    | '/circles'
+    | '/dashboard'
+    | '/yallas'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -114,6 +147,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/boards'
+    | '/circles'
+    | '/dashboard'
+    | '/yallas'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -124,6 +160,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BoardsRoute: typeof BoardsRouteWithChildren
+  CirclesRoute: typeof CirclesRoute
+  DashboardRoute: typeof DashboardRoute
+  YallasRoute: typeof YallasRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -153,6 +192,27 @@ export interface RootServerRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/yallas': {
+      id: '/yallas'
+      path: '/yallas'
+      fullPath: '/yallas'
+      preLoaderRoute: typeof YallasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/circles': {
+      id: '/circles'
+      path: '/circles'
+      fullPath: '/circles'
+      preLoaderRoute: typeof CirclesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/boards': {
       id: '/boards'
       path: '/boards'
@@ -230,6 +290,9 @@ const BoardsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BoardsRoute: BoardsRouteWithChildren,
+  CirclesRoute: CirclesRoute,
+  DashboardRoute: DashboardRoute,
+  YallasRoute: YallasRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,

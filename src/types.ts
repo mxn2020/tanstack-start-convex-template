@@ -59,6 +59,7 @@ export interface Yalla {
   priority: number;
   dueDate?: Date;
   completedAt?: Date;
+  completionImage?: string;
   createdAt: Date;
 }
 
@@ -86,5 +87,20 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   currentView: 'login' | 'register' | 'forgot-password' | 'reset-password' | null;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'vote' | 'assignment' | 'completion' | 'invite' | 'achievement' | 'reminder';
+  title: string;
+  message: string;
+  emoji: string;
+  isRead: boolean;
+  actionUrl?: string;
+  entityType?: 'yalla' | 'circle' | 'user';
+  entityId?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { ConvexUser, Circle, Yalla, Challenge, AuthState } from '../types';
+import { ConvexUser, Circle, Yalla, Challenge } from '../types';
 
 interface AppState {
   user: ConvexUser | null;
@@ -7,16 +7,10 @@ interface AppState {
   yallas: Yalla[];
   challenges: Challenge[];
   currentView: 'dashboard' | 'boards' | 'circles' | 'yallas' | 'profile';
-  auth: AuthState;
 }
 
 type AppAction = 
   | { type: 'SET_USER'; payload: ConvexUser | null }
-  | { type: 'SET_AUTH_VIEW'; payload: AuthState['currentView'] }
-  | { type: 'SET_AUTH_LOADING'; payload: boolean }
-  | { type: 'SET_AUTH_ERROR'; payload: string | null }
-  | { type: 'LOGIN_SUCCESS'; payload: ConvexUser }
-  | { type: 'LOGOUT' }
   | { type: 'ADD_CIRCLE'; payload: Circle }
   | { type: 'UPDATE_CIRCLE'; payload: Circle }
   | { type: 'DELETE_CIRCLE'; payload: string }
@@ -83,55 +77,12 @@ const initialState: AppState = {
   ],
   challenges: [],
   currentView: 'boards', // Default to boards view for our Trello-like app
-  auth: {
-    isAuthenticated: false,
-    isLoading: false,
-    error: null,
-    currentView: 'login',
-  },
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_USER':
       return { ...state, user: action.payload };
-    case 'SET_AUTH_VIEW':
-      return { 
-        ...state, 
-        auth: { ...state.auth, currentView: action.payload, error: null } 
-      };
-    case 'SET_AUTH_LOADING':
-      return { 
-        ...state, 
-        auth: { ...state.auth, isLoading: action.payload } 
-      };
-    case 'SET_AUTH_ERROR':
-      return { 
-        ...state, 
-        auth: { ...state.auth, error: action.payload, isLoading: false } 
-      };
-    case 'LOGIN_SUCCESS':
-      return { 
-        ...state, 
-        user: action.payload,
-        auth: { 
-          isAuthenticated: true, 
-          isLoading: false, 
-          error: null, 
-          currentView: null 
-        } 
-      };
-    case 'LOGOUT':
-      return { 
-        ...state, 
-        user: null,
-        auth: { 
-          isAuthenticated: false, 
-          isLoading: false, 
-          error: null, 
-          currentView: 'login' 
-        } 
-      };
     case 'ADD_CIRCLE':
       return { ...state, circles: [...state.circles, action.payload] };
     case 'UPDATE_CIRCLE':
