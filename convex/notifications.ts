@@ -45,12 +45,12 @@ export const getUnreadCount = query({
 export const createNotification = mutation({
   args: {
     userId: v.string(),
-    type: v.union(v.literal('vote'), v.literal('assignment'), v.literal('completion'), v.literal('invite'), v.literal('achievement'), v.literal('reminder')),
+    type: v.union(v.literal('assignment'), v.literal('completion'), v.literal('invite'), v.literal('achievement'), v.literal('reminder')),
     title: v.string(),
     message: v.string(),
     emoji: v.string(),
     actionUrl: v.optional(v.string()),
-    entityType: v.optional(v.union(v.literal('yalla'), v.literal('circle'), v.literal('user'))),
+    entityType: v.optional(v.union(v.literal('board'), v.literal('item'), v.literal('user'))),
     entityId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -157,28 +157,38 @@ export const deleteNotification = mutation({
   },
 })
 
-// Helper function to create notifications for yalla events
-export const notifyYallaEvent = mutation({
+// Helper function to create notifications for task events
+export const notifyTaskEvent = mutation({
   args: {
-    type: v.union(v.literal('vote'), v.literal('assignment'), v.literal('completion')),
-    yallaId: v.string(),
+    type: v.union(v.literal('assignment'), v.literal('completion')),
+    itemId: v.string(),
+    boardId: v.string(),
     triggeredBy: v.string(), // authUserId of the person who triggered the event
     additionalData: v.optional(v.object({
-      voterName: v.optional(v.string()),
       assignerName: v.optional(v.string()),
       completerName: v.optional(v.string()),
-      yallaTitle: v.optional(v.string()),
+      itemTitle: v.optional(v.string()),
     })),
   },
   handler: async (ctx, args) => {
-    // Get the yalla to determine who to notify
-    const yalla = await ctx.db
-      .query('yallas')
-      .withIndex('id', (q) => q.eq('id', args.yallaId))
+    // Get the item to determine details
+    const item = await ctx.db
+      .query('items')
+      .withIndex('id', (q) => q.eq('id', args.itemId))
       .first()
 
-    if (!yalla) {
-      throw new Error('Yalla not found')
+    if (!item) {
+      throw new Error('Task not found')
+    }
+
+    // Get the board to determine board owner
+    const board = await ctx.db
+      .query('boards')
+      .withIndex('id', (q) => q.eq('id', args.boardId))
+      .first()
+
+    if (!board) {
+      throw new Error('Board not found')
     }
 
     const now = Date.now()
@@ -191,40 +201,24 @@ export const notifyYallaEvent = mutation({
     let emoji = ''
 
     switch (args.type) {
-      case 'vote':
-        // Notify yalla creator about votes (unless they voted themselves)
-        if (yalla.creatorId !== args.triggeredBy) {
-          recipientIds = [yalla.creatorId]
-          title = 'Your yalla is getting attention! 🔥'
-          message = `${args.additionalData?.voterName || 'Someone'} voted on "${args.additionalData?.yallaTitle || yalla.title}"`
-          emoji = '🔥'
-        }
-        break
-
       case 'assignment':
-        // Notify assigned users
-        if (yalla.assignedTo) {
-          recipientIds = yalla.assignedTo.filter(userId => userId !== args.triggeredBy)
-          title = 'New mission incoming! ⚡'
-          message = `${args.additionalData?.assignerName || 'Someone'} assigned you "${args.additionalData?.yallaTitle || yalla.title}"`
-          emoji = '⚡'
+        // For now, notify board owner (could be enhanced to support specific user assignment)
+        if (board.createdBy && board.createdBy !== args.triggeredBy) {
+          recipientIds = [board.createdBy]
+          title = 'Task updated on your board 📝'
+          message = `${args.additionalData?.assignerName || 'Someone'} updated "${args.additionalData?.itemTitle || item.title}"`
+          emoji = '📝'
         }
         break
 
       case 'completion':
-        // Notify circle members about completion (excluding the completer)
-        const circleMembers = await ctx.db
-          .query('circle_members')
-          .withIndex('circle', (q) => q.eq('circleId', yalla.circleId))
-          .collect()
-        
-        recipientIds = circleMembers
-          .map(member => member.userId)
-          .filter(userId => userId !== args.triggeredBy)
-        
-        title = 'Squad member crushed it! 💪'
-        message = `${args.additionalData?.completerName || 'Someone'} completed "${args.additionalData?.yallaTitle || yalla.title}"`
-        emoji = '🏆'
+        // Notify board owner about task completion
+        if (board.createdBy && board.createdBy !== args.triggeredBy) {
+          recipientIds = [board.createdBy]
+          title = 'Task completed! 🎉'
+          message = `${args.additionalData?.completerName || 'Someone'} completed "${args.additionalData?.itemTitle || item.title}"`
+          emoji = '✅'
+        }
         break
     }
 
@@ -240,9 +234,9 @@ export const notifyYallaEvent = mutation({
         message,
         emoji,
         isRead: false,
-        actionUrl: `/yallas`, // Could be more specific like `/yallas/${args.yallaId}`
-        entityType: 'yalla',
-        entityId: args.yallaId,
+        actionUrl: `/boards/${args.boardId}`,
+        entityType: 'item',
+        entityId: args.itemId,
         createdAt: now,
         updatedAt: now,
       })
@@ -287,12 +281,12 @@ export const notifyAchievement = mutation({
   },
 })
 
-// Create circle invite notification
-export const notifyCircleInvite = mutation({
+// Create board invite notification (for future collaboration features)
+export const notifyBoardInvite = mutation({
   args: {
     userId: v.string(),
-    circleId: v.string(),
-    circleName: v.string(),
+    boardId: v.string(),
+    boardName: v.string(),
     inviterName: v.string(),
   },
   handler: async (ctx, args) => {
@@ -303,13 +297,13 @@ export const notifyCircleInvite = mutation({
       id: notificationId,
       userId: args.userId,
       type: 'invite',
-      title: 'Welcome to the squad! 🎉',
-      message: `${args.inviterName} added you to "${args.circleName}" circle - let's get productive!`,
-      emoji: '💫',
+      title: 'Board invitation! 📋',
+      message: `${args.inviterName} invited you to collaborate on "${args.boardName}"`,
+      emoji: '📋',
       isRead: false,
-      actionUrl: `/circles`,
-      entityType: 'circle',
-      entityId: args.circleId,
+      actionUrl: `/boards/${args.boardId}`,
+      entityType: 'board',
+      entityId: args.boardId,
       createdAt: now,
       updatedAt: now,
     })

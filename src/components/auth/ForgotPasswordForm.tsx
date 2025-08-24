@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, ArrowRight, ArrowLeft, Send } from 'lucide-react'
+import { Mail, ArrowRight, ArrowLeft, Send, Loader2 } from 'lucide-react'
 import { authClient } from '~/lib/auth-client'
 
 export function ForgotPasswordForm() {
@@ -34,13 +34,15 @@ export function ForgotPasswordForm() {
   if (isEmailSent) {
     return (
       <div className="text-center space-y-6">
-        <div className="text-8xl mb-6">📧</div>
-        <h3 className="text-2xl font-black text-purple-700 mb-4">
-          Check your inbox, bestie! 💌
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Mail className="h-8 w-8 text-green-600" />
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-4">
+          Check your email
         </h3>
-        <p className="text-purple-600 font-medium mb-6 leading-relaxed">
-          We've sent a password reset link to <strong>{email}</strong>. 
-          Click the link in the email to reset your password and get back to crushing those yallas! 🔥
+        <p className="text-gray-600 mb-6 leading-relaxed">
+          We've sent a password reset link to <strong className="text-gray-900">{email}</strong>. 
+          Click the link in the email to reset your password.
         </p>
         
         <div className="space-y-4">
@@ -50,7 +52,7 @@ export function ForgotPasswordForm() {
               setEmail('')
               setError('')
             }}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white py-4 rounded-2xl font-black text-lg transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
           >
             <Send className="h-5 w-5" />
             <span>Resend Email</span>
@@ -58,10 +60,10 @@ export function ForgotPasswordForm() {
           
           <a
             href="/auth/login"
-            className="w-full text-purple-600 hover:text-purple-800 py-3 font-bold transition-colors flex items-center justify-center space-x-2"
+            className="w-full text-gray-600 hover:text-gray-800 py-3 font-medium transition-colors flex items-center justify-center space-x-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to Login</span>
+            <span>Back to Sign In</span>
           </a>
         </div>
       </div>
@@ -71,35 +73,37 @@ export function ForgotPasswordForm() {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <div className="text-6xl mb-4">🤔</div>
-        <h3 className="text-xl font-black text-purple-700 mb-2">
+        <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Mail className="h-8 w-8 text-indigo-600" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">
           Forgot your password?
         </h3>
-        <p className="text-purple-600 font-medium">
-          No worries! We'll send you a reset link to get you back in the game! 🎮
+        <p className="text-gray-600">
+          Enter your email address and we'll send you a link to reset your password.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-2xl font-medium">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
 
         {/* Email Field */}
         <div>
-          <label className="block text-sm font-bold text-purple-700 mb-2">
-            Email Address ✨
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
           </label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 h-5 w-5" />
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border-2 border-purple-200 rounded-2xl focus:ring-4 focus:ring-purple-300 focus:border-purple-400 transition-all text-purple-800 font-medium placeholder-purple-400"
-              placeholder="your.email@yalla.wtf"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+              placeholder="Enter your email address"
               required
             />
           </div>
@@ -109,16 +113,16 @@ export function ForgotPasswordForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 rounded-2xl font-black text-lg transition-all transform hover:scale-105 disabled:scale-100 shadow-lg flex items-center justify-center space-x-2"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
         >
           {isLoading ? (
             <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              <span>Sending magic link... ✨</span>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Sending reset link...</span>
             </>
           ) : (
             <>
-              <span>Send Reset Link 🚀</span>
+              <span>Send Reset Link</span>
               <ArrowRight className="h-5 w-5" />
             </>
           )}
@@ -126,13 +130,13 @@ export function ForgotPasswordForm() {
       </form>
 
       {/* Back to Login */}
-      <div className="text-center pt-4 border-t border-purple-200">
+      <div className="text-center pt-4 border-t border-gray-200">
         <a
           href="/auth/login"
-          className="text-purple-600 hover:text-purple-800 font-bold transition-colors flex items-center justify-center space-x-2 mx-auto"
+          className="text-indigo-600 hover:text-indigo-500 font-medium transition-colors flex items-center justify-center space-x-2 mx-auto hover:underline"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Login</span>
+          <span>Back to Sign In</span>
         </a>
       </div>
     </div>

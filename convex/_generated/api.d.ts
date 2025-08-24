@@ -14,12 +14,10 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as board from "../board.js";
-import type * as circles from "../circles.js";
 import type * as crons from "../crons.js";
 import type * as migrations_resetUsers from "../migrations/resetUsers.js";
 import type * as notifications from "../notifications.js";
 import type * as users from "../users.js";
-import type * as yallas from "../yallas.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -31,12 +29,10 @@ import type * as yallas from "../yallas.js";
  */
 declare const fullApi: ApiFromModules<{
   board: typeof board;
-  circles: typeof circles;
   crons: typeof crons;
   "migrations/resetUsers": typeof migrations_resetUsers;
   notifications: typeof notifications;
   users: typeof users;
-  yallas: typeof yallas;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

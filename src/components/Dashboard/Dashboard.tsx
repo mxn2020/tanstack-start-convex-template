@@ -4,9 +4,7 @@ import { convexQuery } from '@convex-dev/react-query';
 import { api } from 'convex/_generated/api';
 import { useSession } from '~/lib/auth-client';
 import { StatsCards } from './StatsCards';
-import { RecentYallas } from './RecentYallas';
 import { QuickActions } from './QuickActions';
-import { CircleOverview } from './CircleOverview';
 
 export function Dashboard() {
   const { data: session } = useSession();
@@ -21,13 +19,13 @@ export function Dashboard() {
   const user = userQuery.data;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 min-h-screen">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-5xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent mb-2">
-          Yalla, {user?.name || session?.user?.name}! 🔥
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Welcome back, {user?.name || session?.user?.name}
         </h1>
-        <p className="text-xl text-purple-700 font-medium">
-          Time to vibe check your squad and crush those goals! ⚡
+        <p className="text-lg text-gray-600">
+          Here's an overview of your task management progress
         </p>
       </div>
 
@@ -35,13 +33,11 @@ export function Dashboard() {
         {/* Left Column - Main Content */}
         <div className="lg:col-span-8 space-y-8">
           <StatsCards />
-          <RecentYallas />
         </div>
 
         {/* Right Column - Sidebar */}
         <div className="lg:col-span-4 space-y-8">
           <QuickActions />
-          <CircleOverview />
         </div>
       </div>
     </div>

@@ -131,51 +131,33 @@ export function useNotificationHelpers() {
     mutationFn: useConvexMutation(api.notifications.createNotification),
   })
 
-  const notifyYallaEventMutation = useMutation({
-    mutationFn: useConvexMutation(api.notifications.notifyYallaEvent),
-  })
-
   const notifyAchievementMutation = useMutation({
     mutationFn: useConvexMutation(api.notifications.notifyAchievement),
   })
 
-  const notifyCircleInviteMutation = useMutation({
-    mutationFn: useConvexMutation(api.notifications.notifyCircleInvite),
-  })
-
-  const notifyVote = (yallaId: string, triggeredBy: string, voterName: string, yallaTitle: string) => {
-    notifyYallaEventMutation.mutate({
-      type: 'vote',
-      yallaId,
-      triggeredBy,
-      additionalData: {
-        voterName,
-        yallaTitle,
-      },
-    })
-  }
-
-  const notifyAssignment = (yallaId: string, triggeredBy: string, assignerName: string, yallaTitle: string) => {
-    notifyYallaEventMutation.mutate({
-      type: 'assignment',
-      yallaId,
-      triggeredBy,
-      additionalData: {
-        assignerName,
-        yallaTitle,
-      },
-    })
-  }
-
-  const notifyCompletion = (yallaId: string, triggeredBy: string, completerName: string, yallaTitle: string) => {
-    notifyYallaEventMutation.mutate({
+  const notifyTaskComplete = (itemId: string, triggeredBy: string, completerName: string, itemTitle: string, userId: string) => {
+    createNotificationMutation.mutate({
+      userId: userId,
       type: 'completion',
-      yallaId,
-      triggeredBy,
-      additionalData: {
-        completerName,
-        yallaTitle,
-      },
+      title: 'Task Completed! 🎉',
+      message: `${completerName} completed "${itemTitle}"`,
+      emoji: '✓️',
+      entityType: 'item',
+      entityId: itemId,
+      actionUrl: `/boards`, // Could be more specific if we had board context
+    })
+  }
+
+  const notifyTaskAssignment = (itemId: string, triggeredBy: string, assignerName: string, itemTitle: string, userId: string) => {
+    createNotificationMutation.mutate({
+      userId: userId,
+      type: 'assignment',
+      title: 'New Task Assigned',
+      message: `${assignerName} assigned you "${itemTitle}"`,
+      emoji: '📝',
+      entityType: 'item',
+      entityId: itemId,
+      actionUrl: `/boards`,
     })
   }
 
@@ -191,20 +173,9 @@ export function useNotificationHelpers() {
     })
   }
 
-  const notifyCircleInvite = (userId: string, circleId: string, circleName: string, inviterName: string) => {
-    notifyCircleInviteMutation.mutate({
-      userId,
-      circleId,
-      circleName,
-      inviterName,
-    })
-  }
-
   return {
-    notifyVote,
-    notifyAssignment,
-    notifyCompletion,
+    notifyTaskComplete,
+    notifyTaskAssignment,
     notifyAchievement,
-    notifyCircleInvite,
   }
 }

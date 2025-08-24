@@ -62,14 +62,10 @@ export function NotificationsDropdown({ isOpen, onClose }: Props) {
 
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
-      case 'vote':
-        return <Heart className="h-5 w-5 text-pink-500" />;
       case 'assignment':
         return <Zap className="h-5 w-5 text-orange-500" />;
       case 'completion':
         return <Trophy className="h-5 w-5 text-green-500" />;
-      case 'invite':
-        return <Users className="h-5 w-5 text-purple-500" />;
       case 'achievement':
         return <Trophy className="h-5 w-5 text-yellow-500" />;
       case 'reminder':
@@ -84,22 +80,22 @@ export function NotificationsDropdown({ isOpen, onClose }: Props) {
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-2 w-96 bg-white rounded-3xl shadow-2xl border-0 z-50 max-h-[80vh] overflow-hidden"
+      className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[80vh] overflow-hidden"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-6 rounded-t-3xl">
+      <div className="bg-indigo-600 p-4 rounded-t-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-black text-white">Notifications 🔔</h3>
-            <p className="text-white/90 font-medium">
-              {unreadCount > 0 ? `${unreadCount} new vibes waiting!` : 'You\'re all caught up! ✨'}
+            <h3 className="text-lg font-semibold text-white">Notifications</h3>
+            <p className="text-indigo-100 text-sm">
+              {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-white/80 hover:text-white p-2 hover:bg-white/20 rounded-full transition-all transform hover:scale-110"
+            className="text-indigo-200 hover:text-white p-2 hover:bg-indigo-500 rounded-lg transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
         
@@ -107,9 +103,9 @@ export function NotificationsDropdown({ isOpen, onClose }: Props) {
           <button
             onClick={handleMarkAllAsRead}
             disabled={isLoading}
-            className="mt-4 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 disabled:opacity-50"
+            className="mt-3 bg-indigo-500 hover:bg-indigo-400 text-white px-3 py-1 rounded text-sm font-medium transition-colors disabled:opacity-50"
           >
-            Mark all as read ✅
+            Mark all as read
           </button>
         )}
       </div>
@@ -118,32 +114,31 @@ export function NotificationsDropdown({ isOpen, onClose }: Props) {
       <div className="max-h-96 overflow-y-auto">
         {isLoading && notifications.length === 0 ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-purple-600 font-medium">Loading notifications...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 font-medium">Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-8xl mb-4">🔕</div>
-            <h3 className="text-2xl font-black text-purple-600 mb-2">All quiet, bestie!</h3>
-            <p className="text-purple-500 font-medium">No notifications right now - time to drop some yallas! 🚀</p>
+            <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">All caught up!</h3>
+            <p className="text-gray-500 text-sm">No notifications right now</p>
           </div>
         ) : (
           <div className="p-2">
             {notifications.map((notification, index) => (
               <div
                 key={notification.id}
-                className={`p-4 rounded-2xl mb-2 transition-all transform hover:scale-[1.02] cursor-pointer ${
+                className={`p-4 rounded-lg mb-2 transition-colors cursor-pointer border ${
                   !notification.isRead
-                    ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 shadow-md'
-                    : 'bg-gray-50 hover:bg-gray-100'
+                    ? 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
                 }`}
                 onClick={() => handleMarkAsRead(notification.id)}
-                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex items-start space-x-3">
                   {/* Icon */}
-                  <div className={`p-3 rounded-2xl shadow-lg ${
-                    !notification.isRead ? 'bg-white' : 'bg-white/70'
+                  <div className={`p-2 rounded-lg ${
+                    !notification.isRead ? 'bg-white shadow-sm' : 'bg-white/70'
                   }`}>
                     {getNotificationIcon(notification.type)}
                   </div>
@@ -152,24 +147,24 @@ export function NotificationsDropdown({ isOpen, onClose }: Props) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className={`font-black text-lg ${
-                          !notification.isRead ? 'text-purple-800' : 'text-gray-700'
+                        <h4 className={`font-semibold text-sm ${
+                          !notification.isRead ? 'text-gray-900' : 'text-gray-700'
                         }`}>
                           {notification.title}
                         </h4>
-                        <p className={`text-sm font-medium mt-1 ${
-                          !notification.isRead ? 'text-purple-600' : 'text-gray-600'
+                        <p className={`text-sm mt-1 ${
+                          !notification.isRead ? 'text-gray-600' : 'text-gray-500'
                         }`}>
                           {notification.message}
                         </p>
-                        <div className="flex items-center justify-between mt-3">
-                          <span className={`text-xs font-bold ${
-                            !notification.isRead ? 'text-purple-500' : 'text-gray-500'
+                        <div className="flex items-center justify-between mt-2">
+                          <span className={`text-xs ${
+                            !notification.isRead ? 'text-gray-500' : 'text-gray-400'
                           }`}>
                             {getTimeAgo(notification.createdAt)}
                           </span>
                           {!notification.isRead && (
-                            <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full animate-pulse"></div>
+                            <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
                           )}
                         </div>
                       </div>
@@ -180,7 +175,7 @@ export function NotificationsDropdown({ isOpen, onClose }: Props) {
                           e.stopPropagation();
                           handleDeleteNotification(notification.id);
                         }}
-                        className="text-gray-400 hover:text-red-500 p-1 hover:bg-red-50 rounded-full transition-all transform hover:scale-110 ml-2"
+                        className="text-gray-400 hover:text-red-500 p-1 hover:bg-red-50 rounded transition-colors ml-2"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -195,9 +190,9 @@ export function NotificationsDropdown({ isOpen, onClose }: Props) {
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div className="border-t border-purple-100 p-4 bg-gradient-to-r from-purple-50 to-pink-50">
-          <button className="w-full text-center text-purple-600 hover:text-purple-800 font-bold text-sm transition-colors">
-            View all notifications 👀
+        <div className="border-t border-gray-200 p-4 bg-gray-50">
+          <button className="w-full text-center text-indigo-600 hover:text-indigo-800 font-medium text-sm transition-colors">
+            View all notifications
           </button>
         </div>
       )}

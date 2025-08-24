@@ -32,8 +32,8 @@ export const Route = createRootRouteWithContext<{
       },
       ...seo({
         title:
-          'TanStack Start | Type-Safe, Client-First, Full-Stack React Framework',
-        description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+          'Geenius | Smart Task Management & Kanban Boards',
+        description: `Geenius is a smart task management application with kanban boards for organizing your work efficiently. `,
       }),
     ],
     links: [
