@@ -9,7 +9,7 @@ export const itemSchema = z.object({
   title: z.string(),
   content: z.string().optional(),
   order: z.coerce.number(),
-  columnId: z.string().uuid(),
+  columnId: z.string(),
   boardId: z.coerce.string(),
 })
 
