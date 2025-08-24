@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react'
 import { signUpEmail, signInSocial } from '~/lib/auth-client'
-import { syncUserToConvex } from '~/lib/auth'
 
 export function SignupForm() {
   const navigate = useNavigate()
@@ -52,26 +51,11 @@ export function SignupForm() {
       if (result.error) {
         setError(result.error.message || 'An error occurred')
       } else if (result.data) {
-        try {
-          // Sync user to Convex
-          await syncUserToConvex({
-            id: result.data.user.id,
-            email: result.data.user.email,
-            name: result.data.user.name,
-            image: result.data.user.image,
-          })
-          
-          // Redirect to the intended page or home
-          const redirectTo = (search as any)?.redirect || '/'
-          // Use window.location.href for full page reload to ensure session is properly loaded
-          window.location.href = redirectTo
-        } catch (syncError) {
-          console.error('User sync failed:', syncError)
-          // Still redirect even if sync fails - auth worked
-          const redirectTo = (search as any)?.redirect || '/'
-          // Use window.location.href for full page reload to ensure session is properly loaded
-          window.location.href = redirectTo
-        }
+        // User sync happens automatically via database hooks
+        // Redirect to the intended page or home
+        const redirectTo = (search as any)?.redirect || '/'
+        // Use window.location.href for full page reload to ensure session is properly loaded
+        window.location.href = redirectTo
       }
     } catch (err) {
       setError('An unexpected error occurred')
@@ -208,6 +192,7 @@ export function SignupForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -234,6 +219,7 @@ export function SignupForm() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              tabIndex={-1}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -252,9 +238,9 @@ export function SignupForm() {
           />
           <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
             I agree to the{' '}
-            <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium hover:underline">Terms of Service</a>
+            <a href="#" tabIndex={-1} className="text-indigo-600 hover:text-indigo-500 font-medium hover:underline">Terms of Service</a>
             {' '}and{' '}
-            <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium hover:underline">Privacy Policy</a>
+            <a href="#" tabIndex={-1} className="text-indigo-600 hover:text-indigo-500 font-medium hover:underline">Privacy Policy</a>
           </label>
         </div>
 

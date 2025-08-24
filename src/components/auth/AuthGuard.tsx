@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from '@tanstack/react-router'
 import { useSession } from '~/lib/auth-client'
+import { syncUserToConvex } from '~/lib/auth'
 import { Loader } from '../Loader'
 
 interface AuthGuardProps {
@@ -11,6 +12,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const session = useSession()
   const navigate = useNavigate()
   const location = useLocation()
+  const syncedUsersRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     // Skip auth check for auth routes
@@ -25,6 +27,22 @@ export function AuthGuard({ children }: AuthGuardProps) {
         search: {
           redirect: location.pathname,
         },
+      })
+    }
+
+    // If user is authenticated and we haven't synced them yet this session
+    if (session.data?.user && !syncedUsersRef.current.has(session.data.user.id)) {
+      syncedUsersRef.current.add(session.data.user.id)
+      
+      // Ensure user is synced to Convex (covers existing users who may not be synced)
+      syncUserToConvex({
+        id: session.data.user.id,
+        email: session.data.user.email,
+        name: session.data.user.name,
+        image: session.data.user.image,
+      }).catch((error) => {
+        console.warn('Failed to sync user during session check:', error)
+        // Don't fail the app if sync fails
       })
     }
   }, [session.isPending, session.data, location.pathname, navigate])

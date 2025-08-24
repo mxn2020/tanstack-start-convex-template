@@ -150,21 +150,12 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           </div>
-        </div>
-
-        {/* Forgot Password Link */}
-        <div className="text-right">
-          <a
-            href="/auth/forgot-password"
-            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium hover:underline transition-colors"
-          >
-            Forgot your password?
-          </a>
         </div>
 
         {/* Submit Button */}
@@ -185,6 +176,16 @@ export function LoginForm() {
             </>
           )}
         </button>
+
+        {/* Forgot Password Link */}
+        <div className="text-center">
+          <a
+            href="/auth/forgot-password"
+            className="text-sm text-indigo-600 hover:text-indigo-500 font-medium hover:underline transition-colors"
+          >
+            Forgot your password?
+          </a>
+        </div>
       </form>
 
       {/* Sign Up Link */}
